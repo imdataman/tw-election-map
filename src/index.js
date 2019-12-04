@@ -48,7 +48,7 @@ var blankStyle = {
         "id": "background",
         "type": "background",
         "paint": {
-            "background-color": "#d8dedf"
+            "background-color": "#ffffff"
         }
     }],
     "id": "blank",
@@ -60,7 +60,7 @@ var villageURL = './data/village.json',
     countyURL = './data/county.json',
     townLabelURL = 'https://gist.githubusercontent.com/imdataman/07c49eb3a7049e6ed065ad492710dad3/raw/9507b119481008771020196879e298ab663df2b0/town-label.geojson',
     countyLabelURL = 'https://gist.githubusercontent.com/imdataman/7a84d2a450db032f0a0e3c07bcf45979/raw/21a0393db077a6d4d79f7394820492a9aac0328f/county-label.geojson',
-    villageDataURL = "https://gist.githubusercontent.com/imdataman/156fdb2d7b5fd99a3112e4cb16149787/raw/f03b21f245e28103c35d6bfb4c22d4bbf33cf268/village-data.json";
+    villageDataURL = "./data/village-data.geojson";
 
 var zoomThreshold = [9, 12];
 
@@ -105,24 +105,35 @@ map.on('load', function () {
         loadingGif.style.display = "none";
 
         var countyData = topojson.feature(county, county.objects.county);
+        countyData.features.forEach(function (d) {
+            d.id = +d.properties.id;
+        });
         var townData = topojson.feature(town, town.objects.town);
+        townData.features.forEach(function (d) {
+            d.id = +d.properties.id;
+        });
         var villageData = topojson.feature(village, village.objects.village);
-
-        map.addSource('county', {
-            'type': 'geojson',
-            'data': countyData
+        villageData.features.forEach(function (d) {
+            var refomredId = d.properties.id.slice(0,7) + d.properties.id.slice(9,12);
+            d.properties.id = refomredId;
+            d.id = +refomredId;
         });
 
         map.addLayer({
             "id": "maptiles",
             "type": "raster",
             "source": {
-            "type": "raster",
-            "tiles": ["tiles/{z}/{x}/{y}.png"],
-            "minzoom": 7,
-            "maxzoom": 14
+                "type": "raster",
+                "tiles": ["tiles/{z}/{x}/{y}.png"],
+                "minzoom": 7,
+                "maxzoom": 14
             }
-            });
+        });
+
+        map.addSource('county', {
+            'type': 'geojson',
+            'data': countyData
+        });
 
         map.addLayer({
             'id': 'countyPolygon',
@@ -132,19 +143,6 @@ map.on('load', function () {
             'paint': {
                 'fill-color': 'rgba(0, 0, 0, 0)',
                 'fill-outline-color': 'rgba(0, 0, 0, 0)'
-            }
-        });
-
-        map.addLayer({
-            'id': 'countyBorder',
-            'source': 'county',
-            'minzoom': zoomThreshold[0],
-            'maxzoom': zoomThreshold[1],
-            'type': 'line',
-            'paint': {
-                'line-color': "#000",
-                'line-opacity': 0.8,
-                'line-width': 1
             }
         });
 
@@ -186,18 +184,6 @@ map.on('load', function () {
             'paint': {
                 'fill-color': 'rgba(0, 0, 0, 0)',
                 'fill-outline-color': 'rgba(0, 0, 0, 0)'
-            }
-        });
-
-        map.addLayer({
-            'id': 'townBorder',
-            'source': 'town',
-            'minzoom': zoomThreshold[1],
-            'type': 'line',
-            'paint': {
-                'line-color': "#000",
-                'line-opacity': 0.8,
-                'line-width': 1
             }
         });
 
@@ -373,7 +359,7 @@ map.on('load', function () {
 
                         hoveredFeature = {
                             source: "village",
-                            id: destination.id
+                            id: destination.properties.id
                         };
                     } else {
                         if (hoveredFeature) {
@@ -382,20 +368,20 @@ map.on('load', function () {
                                 id: hoveredFeature
                             });
                         }
-                        hoveredFeature = destination.id;
+                        hoveredFeature = destination.properties.id;
                     }
 
                     map.setFeatureState({
                         source: "village",
-                        id: destination.id,
+                        id: destination.properties.id,
                     }, {
                         hover: true
                     });
 
-                    var title = destination.properties.VILLAGE;
+                    var title = destination.properties.name;
                     /* var population = destination.properties.kmt.toLocaleString(); */
 
-                    overlay.innerHTML = "<span>地區</span><br/>" + title + "<br/><br/><span>人口密度</span><br/>"  + "人／km²";
+                    overlay.innerHTML = "<span>地區</span><br/>" + title + "<br/><br/><span>人口密度</span><br/>" + "人／km²";
                     overlay.style.display = 'inline-block';
                 });
             });
@@ -419,17 +405,17 @@ function addTooltip(id) {
 
             hoveredFeature = {
                 source: specificSource,
-                id: e.features[0].id
+                id: e.features[0].properties.id
             };
 
             map.setFeatureState({
                 source: specificSource,
-                id: e.features[0].id,
+                id: e.features[0].properties.id,
             }, {
                 hover: true
             });
 
-            var title = e.features[0].properties.COUNTY;
+            var title = e.features[0].properties.name;
             /* var population = e.features[0].properties.kmt.toLocaleString(); */
 
             overlay.innerHTML = "<span>地區</span><br/>" + title + "<br/><br/><span>人口密度</span><br/>" + "人／km²";
@@ -451,7 +437,8 @@ function addTooltip(id) {
                 });
             }
 
-            hoveredFeature = e.features[0].id;
+            hoveredFeature = e.features[0].properties.id;
+            console.log(hoveredFeature)
             map.setFeatureState({
                 source: specificSource,
                 id: hoveredFeature,
@@ -459,7 +446,7 @@ function addTooltip(id) {
                 hover: true
             });
 
-            var title = e.features[0].properties.COUNTY;
+            var title = e.features[0].properties.name;
             /* var population = e.features[0].properties.kmt.toLocaleString(); */
 
             overlay.innerHTML = "<span>地區</span><br/>" + title + "<br/><br/><span>人口密度</span><br/>" + "人／km²";
@@ -482,19 +469,3 @@ function addTooltip(id) {
         });
     }
 }
-
-map.on('zoom', function () {
-    if (map.getZoom() > zoomThreshold[0] && map.getZoom() <= zoomThreshold[1]) {
-        villageLegend.style.display = 'none';
-        townLegend.style.display = 'block';
-        countyLegend.style.display = 'none';
-    } else if (map.getZoom() > zoomThreshold[1]) {
-        villageLegend.style.display = 'block';
-        townLegend.style.display = 'none';
-        countyLegend.style.display = 'none';
-    } else {
-        villageLegend.style.display = 'none';
-        townLegend.style.display = 'none';
-        countyLegend.style.display = 'block';
-    }
-});
