@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="user-scalable=no">
+    <meta charset='utf-8' />
+    <title>台灣人口密度地圖 Taiwan Pop Density Map</title>
+    <meta property="og:title" content="台灣人口密度地圖 Taiwan Pop Density Map">
+    <meta property="og:description" content="2019年台灣各地區人口密度互動地圖 Interactive map for population density in Taiwan">
+    <meta property="og:image" content="image/thumbnail.png">
+    <meta property="og:url" content="https://imdataman.github.io/mapbox-density-map/">
+    <meta name="twitter:title" content="台灣人口密度地圖 Taiwan Pop Density Map">
+    <meta name="twitter:description" content="2019年台灣各地區人口密度互動地圖 Interactive map for population density in Taiwan">
+    <meta name="twitter:image" content="image/thumbnail.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>Update a choropleth layer by zoom level</title>
+    <script
+        src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL">
+    </script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+
+        #mainTitle {
+            position: absolute;
+            left: 13%;
+            top: 8%;
+            font-family: Helvetica;
+            z-index: 10000;
+            font-size: 36px;
+            color: white;
+            padding: 0px 30px 0px 30px;
+            background-color: rgba(49, 130, 189, 0.2);
+            pointer-events: none;
+        }
+
+        #byline {
+            font-size: 18px;
+            margin-top: -20px;
+            margin-bottom: 40px;
+        }
+
+        .social-icon {
+            height: 32px;
+            transform: translate(0px, 0.55em);
+            pointer-events: auto;
+        }
+
+        #github-icon {
+            height: 20px;
+            transform: translate(0px, 0.15em);
+        }
+
+        div .mapboxgl-control-container {
+            position: absolute;
+            z-index: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        div .mapboxgl-ctrl-top-right {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0);
+            width: 100%;
+            text-align: center;
+            top: auto;
+            bottom: 5%;
+        }
+
+        div .mapboxgl-ctrl button {
+            display: inline-block;
+            height: 5em;
+            width: 5em;
+        }
+
+        .mapboxgl-ctrl-top-right .mapboxgl-ctrl {
+            margin: 10px 47vw 0 0;
+        }
+
+        .mapboxgl-ctrl-group>button+button {
+            border-top: none;
+        }
+    </style>
+</head>
+
+<body>
+    <style>
+        .floatTL {
+            display: inline-block;
+            position: absolute;
+            bottom: 50%;
+            right: 20%;
+            z-index: 1000;
+        }
+
+        img {
+            opacity: 0.8;
+            height: 30vh;
+        }
+
+        #villageLegend {
+            position: absolute;
+            z-index: 1;
+            display: none;
+        }
+
+        #townLegend {
+            position: absolute;
+            z-index: 2;
+            display: none;
+        }
+
+        #countyLegend {
+            position: absolute;
+            z-index: 3;
+        }
+
+        #selectLocation {
+            z-index: 1;
+            position: absolute;
+            left: 13.3%;
+            top: 36.5%;
+        }
+
+        #map-overlay {
+            text-align: left;
+            display: none;
+            font-size: 24px;
+            background: white;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0.8;
+            position: absolute;
+            left: 5%;
+            bottom: 20%;
+            font-family: Helvetica;
+            padding: 20px 30px 20px 30px;
+        }
+
+        .legend {
+            background-color: #fff;
+            border-radius: 3px;
+            bottom: 30px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            padding: 10px;
+            position: absolute;
+            right: 10px;
+            z-index: 1;
+        }
+
+        .legend h4 {
+            margin: 0 0 10px;
+        }
+
+        .legend div span {
+            border-radius: 50%;
+            display: inline-block;
+            height: 10px;
+            margin-right: 5px;
+            width: 10px;
+        }
+
+        .select-css {
+            display: block;
+            font-size: 16px;
+            font-family: sans-serif;
+            font-weight: 700;
+            color: #444;
+            line-height: 1.3;
+            padding: .6em 1.4em .5em .8em;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            margin: 0;
+            border: 1px solid #aaa;
+            box-shadow: 0 1px 0 1px rgba(0, 0, 0, .04);
+            border-radius: .5em;
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            appearance: none;
+            background-color: #fff;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'),
+                linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%);
+            background-repeat: no-repeat, repeat;
+            background-position: right .7em top 50%, 0 0;
+            background-size: .65em auto, 100%;
+        }
+
+        .select-css::-ms-expand {
+            display: none;
+        }
+
+        .select-css:hover {
+            border-color: #888;
+        }
+
+        .select-css:focus {
+            border-color: #aaa;
+            box-shadow: 0 0 1px 3px rgba(59, 153, 252, .7);
+            box-shadow: 0 0 0 3px -moz-mac-focusring;
+            color: #222;
+            outline: none;
+        }
+
+        .select-css option {
+            font-weight: normal;
+        }
+
+        #loading {
+            display: inline-block;
+            position: absolute;
+            bottom: 50%;
+            right: 50%;
+            z-index: 1000;
+        }
+
+        #loading img {
+            height: 32px;
+        }
+    </style>
+    <div id="mainTitle">
+        <p>台灣人口密度地圖</p>
+        <p id="byline">資料來源：社會經濟資料庫</br>製作：林佳賢<a href="https://twitter.com/imandylin2" target="_blank"><img
+                    class='social-icon' src="image/Twitter_Logo_Blue.svg"></a><a href="https://github.com/imdataman"
+                target="_blank"><img class='social-icon' id="github-icon" src="image/GitHub-Mark.svg"></a></p>
+    </div>
+    <div id='map'></div>
+    <div id="selectLocation">
+        <select name="county" id="selectCounty" class='select-css'>
+            <option value="pending">縣市</option>
+            <option value="基隆市">基隆市</option>
+            <option value="新竹市">新竹市</option>
+            <option value="嘉義市">嘉義市</option>
+            <option value="宜蘭縣">宜蘭縣</option>
+            <option value="新竹縣">新竹縣</option>
+            <option value="苗栗縣">苗栗縣</option>
+            <option value="彰化縣">彰化縣</option>
+            <option value="南投縣">南投縣</option>
+            <option value="雲林縣">雲林縣</option>
+            <option value="嘉義縣">嘉義縣</option>
+            <option value="屏東縣">屏東縣</option>
+            <option value="花蓮縣">花蓮縣</option>
+            <option value="臺東縣">臺東縣</option>
+            <option value="澎湖縣">澎湖縣</option>
+            <option value="臺北市">臺北市</option>
+            <option value="新北市">新北市</option>
+            <option value="桃園市">桃園市</option>
+            <option value="臺中市">臺中市</option>
+            <option value="臺南市">臺南市</option>
+            <option value="高雄市">高雄市</option>
+            <option value="金門縣">金門縣</option>
+            <option value="馬祖縣">馬祖縣</option>
+        </select>
+        <select name="town" id="selectTown" class='select-css'></select>
+        <select name="village" id="selectVillage" class='select-css'></select>
+    </div>
+    <div id='map-overlay' class='map-overlay'></div>
+    <div class='floatTL'>
+        <img id='villageLegend' src="image/legendVillage.svg">
+        <img id='townLegend' src="image/legendTown.svg">
+        <img id='countyLegend' src="image/legendCounty.svg">
+    </div>
+    <div id='loading'>
+        <img src="image/loading.gif">
+    </div>
+    <script src="main.js"></script>
+
+</body>
+
+</html>

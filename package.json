@@ -1,0 +1,31 @@
+{
+  "name": "mapbox-density-map",
+  "version": "1.0.0",
+  "description": "Try to build a slippy map similar to the one built earlier with OpenLayers",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "webpack-dev-server --open --config webpack.config.js",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imdataman/mapbox-density-map.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/imdataman/mapbox-density-map/issues"
+  },
+  "homepage": "https://github.com/imdataman/mapbox-density-map#readme",
+  "dependencies": {
+    "d3-queue": "^3.0.7",
+    "d3-request": "^1.0.6",
+    "mapbox-gl": "^1.5.1",
+    "topojson-client": "^3.1.0"
+  },
+  "devDependencies": {
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0"
+  }
+}
