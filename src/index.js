@@ -20,7 +20,7 @@ if (mobile) {
     fontSize = 32;
     document.getElementById('map-overlay').style.fontSize = 32 + 'px';
     document.getElementById('map-overlay').style.left = "9%";
-    document.getElementsByClassName('floatTL')[0].style.right = '25%';
+    /* document.getElementsByClassName('floatTL')[0].style.right = '25%'; */
     document.getElementsByClassName('select-css')[0].style.fontSize = '24px';
     document.getElementsByClassName('select-css')[1].style.fontSize = '24px';
     document.getElementsByClassName('select-css')[2].style.fontSize = '24px';
@@ -62,7 +62,7 @@ var villageURL = './data/village.json',
     countyLabelURL = 'https://gist.githubusercontent.com/imdataman/7a84d2a450db032f0a0e3c07bcf45979/raw/21a0393db077a6d4d79f7394820492a9aac0328f/county-label.geojson',
     villageDataURL = "./data/village-data.geojson";
 
-var zoomThreshold = [9, 12];
+var zoomThreshold = [10, 13];
 
 var hoveredFeature = null;
 
@@ -79,7 +79,8 @@ var map = new mapboxgl.Map({
     container: 'map',
     style: blankStyle,
     center: [120.973882, 23.57565],
-    minZoom: 3,
+    minZoom: 7,
+    maxZoom: 14,
     zoom: initialZoom
 });
 
@@ -114,7 +115,7 @@ map.on('load', function () {
         });
         var villageData = topojson.feature(village, village.objects.village);
         villageData.features.forEach(function (d) {
-            var refomredId = d.properties.id.slice(0,7) + d.properties.id.slice(9,12);
+            var refomredId = d.properties.id.slice(0, 7) + d.properties.id.slice(9, 12);
             d.properties.id = refomredId;
             d.id = +refomredId;
         });
@@ -268,7 +269,10 @@ map.on('load', function () {
                 "text-font": [
                     "Helvetica"
                 ],
-                "text-size": fontSize
+                "text-size": fontSize,
+            },
+            "paint": {
+                "text-opacity": 0.5
             }
         });
 
@@ -289,6 +293,9 @@ map.on('load', function () {
                     "Helvetica"
                 ],
                 "text-size": fontSize
+            },
+            "paint": {
+                "text-opacity": 0.5
             }
         });
 
@@ -352,36 +359,25 @@ map.on('load', function () {
                         maxZoom: 14
                     });
 
-                    if (mobile) {
-                        if (hoveredFeature) {
-                            map.removeFeatureState(hoveredFeature);
-                        }
-
-                        hoveredFeature = {
-                            source: "village",
-                            id: destination.properties.id
-                        };
-                    } else {
-                        if (hoveredFeature) {
-                            map.removeFeatureState({
-                                source: "village",
-                                id: hoveredFeature
-                            });
-                        }
-                        hoveredFeature = destination.properties.id;
+                    if (hoveredFeature) {
+                        map.removeFeatureState(hoveredFeature);
                     }
-
-                    map.setFeatureState({
+                    hoveredFeature = {
                         source: "village",
-                        id: destination.properties.id,
-                    }, {
+                        id: destination.properties.id
+                    };
+
+                    map.setFeatureState(hoveredFeature, {
                         hover: true
                     });
 
                     var title = destination.properties.name;
-                    /* var population = destination.properties.kmt.toLocaleString(); */
+                    var blue = +e.features[0].properties.kmt + +e.features[0].properties.pfp;
+                    blue = Math.round(blue * 10) / 10;
+                    var green = e.features[0].properties.ddp;
+                    green = Math.round(green * 10) / 10;
 
-                    overlay.innerHTML = "<span>地區</span><br/>" + title + "<br/><br/><span>人口密度</span><br/>" + "人／km²";
+                    overlay.innerHTML = title + "<br/><span>藍營：" + blue + "%</span>" + "<br/><span>綠營：" + green + "%</span>";;
                     overlay.style.display = 'inline-block';
                 });
             });
@@ -408,17 +404,17 @@ function addTooltip(id) {
                 id: e.features[0].properties.id
             };
 
-            map.setFeatureState({
-                source: specificSource,
-                id: e.features[0].properties.id,
-            }, {
+            map.setFeatureState(hoveredFeature, {
                 hover: true
             });
 
             var title = e.features[0].properties.name;
-            /* var population = e.features[0].properties.kmt.toLocaleString(); */
+            var blue = +e.features[0].properties.kmt + +e.features[0].properties.pfp;
+            blue = Math.round(blue * 10) / 10;
+            var green = e.features[0].properties.ddp;
+            green = Math.round(green * 10) / 10;
 
-            overlay.innerHTML = "<span>地區</span><br/>" + title + "<br/><br/><span>人口密度</span><br/>" + "人／km²";
+            overlay.innerHTML = title + "<br/><span>藍營：" + blue + "%</span>" + "<br/><span>綠營：" + green + "%</span>";
             overlay.style.display = 'inline-block';
         });
     } else {
@@ -431,25 +427,25 @@ function addTooltip(id) {
             overlay.innerHTML = '';
 
             if (hoveredFeature) {
-                map.removeFeatureState({
-                    source: specificSource,
-                    id: hoveredFeature
-                });
+                map.removeFeatureState(hoveredFeature);
             }
 
-            hoveredFeature = e.features[0].properties.id;
-            console.log(hoveredFeature)
-            map.setFeatureState({
+            hoveredFeature = {
                 source: specificSource,
-                id: hoveredFeature,
-            }, {
+                id: e.features[0].properties.id
+            }
+
+            map.setFeatureState(hoveredFeature, {
                 hover: true
             });
 
             var title = e.features[0].properties.name;
-            /* var population = e.features[0].properties.kmt.toLocaleString(); */
+            var blue = +e.features[0].properties.kmt + +e.features[0].properties.pfp;
+            blue = Math.round(blue * 10) / 10;
+            var green = e.features[0].properties.ddp;
+            green = Math.round(green * 10) / 10;
 
-            overlay.innerHTML = "<span>地區</span><br/>" + title + "<br/><br/><span>人口密度</span><br/>" + "人／km²";
+            overlay.innerHTML = title + "<br/><span>藍營：" + blue + "%</span>" + "<br/><span>綠營：" + green + "%</span>";
             overlay.style.display = 'inline-block';
         });
 
@@ -457,10 +453,7 @@ function addTooltip(id) {
             var specificSource = id.slice(0, 4) == "coun" ? "county" : id.slice(0, 4) == "town" ? "town" : "village";
 
             if (hoveredFeature) {
-                map.removeFeatureState({
-                    source: specificSource,
-                    id: hoveredFeature
-                });
+                map.removeFeatureState(hoveredFeature);
             }
             hoveredFeature = null;
             map.getCanvas().style.cursor = '';

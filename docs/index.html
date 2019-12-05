@@ -4,7 +4,7 @@
 <head>
     <meta name="viewport" content="user-scalable=no">
     <meta charset='utf-8' />
-    <title>台灣人口密度地圖 Taiwan Pop Density Map</title>
+    <!-- <title>台灣人口密度地圖 Taiwan Pop Density Map</title>
     <meta property="og:title" content="台灣人口密度地圖 Taiwan Pop Density Map">
     <meta property="og:description" content="2019年台灣各地區人口密度互動地圖 Interactive map for population density in Taiwan">
     <meta property="og:image" content="image/thumbnail.png">
@@ -12,8 +12,7 @@
     <meta name="twitter:title" content="台灣人口密度地圖 Taiwan Pop Density Map">
     <meta name="twitter:description" content="2019年台灣各地區人口密度互動地圖 Interactive map for population density in Taiwan">
     <meta name="twitter:image" content="image/thumbnail.png">
-    <meta name="twitter:card" content="summary_large_image">
-    <title>Update a choropleth layer by zoom level</title>
+    <meta name="twitter:card" content="summary_large_image"> -->
     <script
         src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL">
     </script>
@@ -43,20 +42,34 @@
             pointer-events: none;
         }
 
+        #source {
+            font-size: 14px;
+            margin-top: 0px;
+        }
+
         #byline {
-            font-size: 18px;
-            margin-top: -20px;
+            font-size: 14px;
+            margin-top: -30px;
             margin-bottom: 40px;
+        }
+
+        #standout {
+            font-size: 18px;
+            margin-top: -30px;
+        }
+
+        #byline br {
+            line-height:22px;
         }
 
         .social-icon {
             height: 32px;
-            transform: translate(0px, 0.55em);
+            transform: translate(0px, 0.7em);
             pointer-events: auto;
         }
 
         #github-icon {
-            height: 20px;
+            height: 18px;
             transform: translate(0px, 0.15em);
         }
 
@@ -95,23 +108,23 @@
 
 <body>
     <style>
-        .floatTL {
+        /* .floatTL {
             display: inline-block;
             position: absolute;
             bottom: 50%;
             right: 20%;
             z-index: 1000;
-        }
+        } */
 
         img {
             opacity: 0.8;
             height: 30vh;
         }
 
-        #countyLegend {
+        /* #countyLegend {
             position: absolute;
             z-index: 3;
-        }
+        } */
 
         #selectLocation {
             z-index: 1;
@@ -133,30 +146,6 @@
             bottom: 20%;
             font-family: Helvetica;
             padding: 20px 30px 20px 30px;
-        }
-
-        .legend {
-            background-color: #fff;
-            border-radius: 3px;
-            bottom: 30px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
-            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-            padding: 10px;
-            position: absolute;
-            right: 10px;
-            z-index: 1;
-        }
-
-        .legend h4 {
-            margin: 0 0 10px;
-        }
-
-        .legend div span {
-            border-radius: 50%;
-            display: inline-block;
-            height: 10px;
-            margin-right: 5px;
-            width: 10px;
         }
 
         .select-css {
@@ -218,8 +207,9 @@
         }
     </style>
     <div id="mainTitle">
-        <p>台灣人口密度地圖</p>
-        <p id="byline">資料來源：社會經濟資料庫</br>製作：林佳賢<a href="https://twitter.com/imandylin2" target="_blank"><img
+        <p>台灣2016總統大選地圖</p>
+        <p id="standout">每個點代表十票，點顏色代表所屬村里投票傾向</p>
+        <p id="source">資料來源：社會經濟資料庫、中選會</p><p id="byline">製作：林佳賢<a href="https://twitter.com/imandylin2" target="_blank"><img
                     class='social-icon' src="image/Twitter_Logo_Blue.svg"></a><a href="https://github.com/imdataman"
                 target="_blank"><img class='social-icon' id="github-icon" src="image/GitHub-Mark.svg"></a></p>
     </div>
@@ -254,9 +244,9 @@
         <select name="village" id="selectVillage" class='select-css'></select>
     </div>
     <div id='map-overlay' class='map-overlay'></div>
-    <div class='floatTL'>
+    <!-- <div class='floatTL'>
         <img id='countyLegend' src="image/legendCounty.svg">
-    </div>
+    </div> -->
     <div id='loading'>
         <img src="image/loading.gif">
     </div>
