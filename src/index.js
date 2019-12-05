@@ -372,9 +372,9 @@ map.on('load', function () {
                     });
 
                     var title = destination.properties.name;
-                    var blue = +e.features[0].properties.kmt + +e.features[0].properties.pfp;
+                    var blue = +destination.properties.kmt + +destination.properties.pfp;
                     blue = Math.round(blue * 10) / 10;
-                    var green = e.features[0].properties.ddp;
+                    var green = destination.properties.ddp;
                     green = Math.round(green * 10) / 10;
 
                     overlay.innerHTML = title + "<br/><span>藍營：" + blue + "%</span>" + "<br/><span>綠營：" + green + "%</span>";;
