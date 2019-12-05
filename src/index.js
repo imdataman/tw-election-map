@@ -125,7 +125,7 @@ map.on('load', function () {
             "type": "raster",
             "source": {
                 "type": "raster",
-                "tiles": ["tiles/{z}/{x}/{y}.png"],
+                "tiles": ["tile/{z}/{x}/{y}.png"],
                 "minzoom": 7,
                 "maxzoom": 14
             }
