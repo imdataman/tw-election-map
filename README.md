@@ -1,6 +1,6 @@
 # 台灣2016總統大選地圖 Taiwan 2016 Presidential Election Dot Map
 
-![Taiwan 2016 Presidential Election Dot Map](img/thumbnail.png)
+![Taiwan 2016 Presidential Election Dot Map](docs/image/thumbnail.png)
 
 <br>
 
